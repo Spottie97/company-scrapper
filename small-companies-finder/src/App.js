@@ -97,7 +97,7 @@ function App() {
           <select value={industry} onChange={e => setIndustry(e.target.value)}>
             <option value="">Select Industry</option>
             {industries.map(ind => (
-              <option key={ind.sic_code} value={ind.description}>{ind.description}</option>
+              <option key={ind.code} value={ind.description}>{ind.description}</option>
             ))}
           </select>
           <label>
@@ -120,6 +120,7 @@ function App() {
               <th>Contact</th>
               <th>Location</th>
               <th>Industry</th>
+              <th>Website</th>
             </tr>
           </thead>
           <tbody>
@@ -130,6 +131,7 @@ function App() {
                 <td>{company.contact}</td>
                 <td>{company.location}</td>
                 <td>{company.industry}</td>
+                <td><a href={company.website} target="_blank" rel="noopener noreferrer">{company.website}</a></td>
               </tr>
             ))}
           </tbody>

@@ -80,27 +80,55 @@ const fetchFromGooglePlaces = async (location, industry, radius) => {
 
     const { lat, lng } = geocodeResponse.data.results[0].geometry.location;
 
-    const response = await axios.get(
-      "https://maps.googleapis.com/maps/api/place/nearbysearch/json",
-      {
-        params: {
-          location: `${lat},${lng}`,
-          radius: radius * 1000, // Convert km to meters
-          keyword: industry,
-          key: process.env.GOOGLE_PLACES_API_KEY,
-        },
+    let places = [];
+    let nextPageToken;
+    do {
+      const response = await axios.get(
+        "https://maps.googleapis.com/maps/api/place/nearbysearch/json",
+        {
+          params: {
+            location: `${lat},${lng}`,
+            radius: radius * 1000, // Convert km to meters
+            keyword: industry,
+            key: process.env.GOOGLE_PLACES_API_KEY,
+            pagetoken: nextPageToken,
+          },
+        }
+      );
+      places = places.concat(response.data.results);
+      nextPageToken = response.data.next_page_token;
+      if (nextPageToken) {
+        // Google API might need a delay to process the next page token
+        await new Promise((resolve) => setTimeout(resolve, 2000));
       }
+    } while (nextPageToken);
+
+    const detailedPlaces = await Promise.all(
+      places.map(async (place) => {
+        const placeDetailsResponse = await axios.get(
+          "https://maps.googleapis.com/maps/api/place/details/json",
+          {
+            params: {
+              place_id: place.place_id,
+              fields:
+                "name,formatted_phone_number,website,formatted_address,place_id",
+              key: process.env.GOOGLE_PLACES_API_KEY,
+            },
+          }
+        );
+        const details = placeDetailsResponse.data.result;
+        return {
+          id: details.place_id,
+          name: details.name,
+          contact: details.formatted_phone_number || "N/A",
+          location: details.formatted_address,
+          website: details.website || "N/A",
+          industry,
+        };
+      })
     );
 
-    const places = response.data.results;
-    return places.map((place) => ({
-      id: place.place_id,
-      name: place.name,
-      contact: place.formatted_phone_number || "N/A",
-      location: place.vicinity,
-      industry,
-      size: "N/A",
-    }));
+    return detailedPlaces;
   } catch (error) {
     console.error("Error fetching data from Google Places:", error.message);
     return [];
@@ -113,20 +141,35 @@ app.get("/api/search", async (req, res) => {
   const radiusLimit = parseInt(radius, 10) || 10;
 
   try {
-    const companies = await fetchFromGooglePlaces(
-      location,
-      industry,
-      radiusLimit
-    );
-
-    if (companies.length > 0 && collection) {
-      await collection.insertMany(companies);
-      console.log("Data inserted into MongoDB");
+    // Check database first
+    const cachedCompanies = await collection
+      .find({ location, industry, radius: { $lte: radiusLimit } })
+      .toArray();
+    if (cachedCompanies.length > 0) {
+      res.json(cachedCompanies);
     } else {
-      console.log("No data to insert into MongoDB");
-    }
+      const companies = await fetchFromGooglePlaces(
+        location,
+        industry,
+        radiusLimit
+      );
 
-    res.json(companies);
+      if (companies.length > 0 && collection) {
+        await collection.insertMany(companies, { ordered: false });
+        console.log("Data inserted into MongoDB");
+
+        // Limit the database size to 1000 entries
+        const count = await collection.countDocuments();
+        if (count > 1000) {
+          await collection.deleteMany({});
+          console.log("Database cleared after reaching 1000 entries");
+        }
+      } else {
+        console.log("No data to insert into MongoDB");
+      }
+
+      res.json(companies);
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error fetching companies" });
