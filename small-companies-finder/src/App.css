@@ -1,6 +1,7 @@
 body {
   font-family: Arial, sans-serif;
-  background-color: #f7f7f7;
+  background-color: #1a1a1a;
+  color: white;
   margin: 0;
   padding: 0;
 }
@@ -49,39 +50,51 @@ body {
   gap: 10px;
 }
 
+.table-container {
+  overflow-x: auto;
+}
+
 .company-table {
   width: 100%;
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
   border-collapse: collapse;
+  background-color: #2a2a2a;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  color: white;
 }
 
 .company-table th, .company-table td {
-  border: 1px solid #ddd;
-  padding: 8px;
+  border: 1px solid #444;
+  padding: 12px 15px;
+  text-align: left;
 }
 
 .company-table th {
   background-color: #4CAF50;
   color: white;
-  text-align: left;
+  font-weight: bold;
+}
+
+.company-table tr {
+  transition: background-color 0.2s ease;
 }
 
 .company-table tr:nth-child(even) {
-  background-color: #f2f2f2;
+  background-color: #333;
 }
 
 .company-table tr:hover {
-  background-color: #ddd;
+  background-color: #444;
 }
 
 .company-table th, .company-table td a {
   text-decoration: none;
-  color: #000;
+  color: white;
 }
 
 .company-table td a {
-  color: #1a0dab;
+  color: #4CAF50;
 }
 
 .company-table td a:hover {
@@ -97,6 +110,7 @@ button {
 
 button:hover {
   background-color: #ddd;
+  color: black;
 }
 
 button:focus {

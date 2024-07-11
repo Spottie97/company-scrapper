@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 
 function App() {
@@ -86,7 +86,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Find Small Companies</h1>
+        <h1>Scrap my location</h1>
         <div className="search-form">
           <input
             type="text"
@@ -112,30 +112,36 @@ function App() {
           </label>
           <button onClick={handleSearch}>Search</button>
         </div>
-        <table className="company-table">
-          <thead>
-            <tr>
-              <th><input type="checkbox" checked={selectedCompanies.length === companies.length && companies.length > 0} onChange={handleSelectAll} /></th>
-              <th>Name</th>
-              <th>Contact</th>
-              <th>Location</th>
-              <th>Industry</th>
-              <th>Website</th>
-            </tr>
-          </thead>
-          <tbody>
-            {companies.map(company => (
-              <tr key={company.id}>
-                <td><input type="checkbox" checked={selectedCompanies.includes(company.id)} onChange={() => handleSelectCompany(company.id)} /></td>
-                <td>{company.name}</td>
-                <td>{company.contact}</td>
-                <td>{company.location}</td>
-                <td>{company.industry}</td>
-                <td><a href={company.website} target="_blank" rel="noopener noreferrer">{company.website}</a></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="table-container">
+          {companies.length > 0 ? (
+            <table className="company-table">
+              <thead>
+                <tr>
+                  <th><input type="checkbox" checked={selectedCompanies.length === companies.length && companies.length > 0} onChange={handleSelectAll} /></th>
+                  <th>Name</th>
+                  <th>Contact</th>
+                  <th>Location</th>
+                  <th>Industry</th>
+                  <th>Website</th>
+                </tr>
+              </thead>
+              <tbody>
+                {companies.map(company => (
+                  <tr key={company.id}>
+                    <td><input type="checkbox" checked={selectedCompanies.includes(company.id)} onChange={() => handleSelectCompany(company.id)} /></td>
+                    <td>{company.name}</td>
+                    <td>{company.contact}</td>
+                    <td>{company.location}</td>
+                    <td>{company.industry}</td>
+                    <td><a href={company.website} target="_blank" rel="noopener noreferrer">{company.website}</a></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p>No companies found for the specified criteria.</p>
+          )}
+        </div>
         {selectedCompanies.length > 0 && <button onClick={handleDeleteSelected}>Delete Selected</button>}
       </header>
     </div>
