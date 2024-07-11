@@ -1,4 +1,4 @@
-require("dotenv").config();
+require("dotenv").config({ path: `.env.${process.env.NODE_ENV}` });
 const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
@@ -7,15 +7,14 @@ const path = require("path");
 const { MongoClient, ServerApiVersion } = require("mongodb");
 
 const app = express();
-const port = 5001;
+const port = process.env.PORT || 5001;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// MongoDB connection
 const uri = process.env.MONGO_URI;
 const client = new MongoClient(uri, {
+  useUnifiedTopology: true,
   serverApi: {
     version: ServerApiVersion.v1,
     strict: true,
@@ -29,9 +28,7 @@ async function connectToMongoDB() {
   try {
     await client.connect();
     await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    console.log("Pinged your deployment. You successfully connected to MongoDB!");
 
     collection = client.db("companyData").collection("companies");
   } catch (error) {
@@ -42,12 +39,10 @@ async function connectToMongoDB() {
 
 connectToMongoDB();
 
-// Basic Route
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-// Serve industries JSON file
 app.get("/api/industries", (req, res) => {
   const industriesPath = path.join(__dirname, "industries.json");
   fs.readFile(industriesPath, "utf8", (err, data) => {
@@ -60,18 +55,14 @@ app.get("/api/industries", (req, res) => {
   });
 });
 
-// Helper function to fetch data from Google Places API
 const fetchFromGooglePlaces = async (location, industry, radius) => {
   try {
-    const geocodeResponse = await axios.get(
-      "https://maps.googleapis.com/maps/api/geocode/json",
-      {
-        params: {
-          address: location,
-          key: process.env.GOOGLE_PLACES_API_KEY,
-        },
-      }
-    );
+    const geocodeResponse = await axios.get("https://maps.googleapis.com/maps/api/geocode/json", {
+      params: {
+        address: location,
+        key: process.env.GOOGLE_PLACES_API_KEY,
+      },
+    });
 
     if (!geocodeResponse.data.results.length) {
       console.error("Geocoding API response:", geocodeResponse.data);
@@ -83,39 +74,31 @@ const fetchFromGooglePlaces = async (location, industry, radius) => {
     let places = [];
     let nextPageToken;
     do {
-      const response = await axios.get(
-        "https://maps.googleapis.com/maps/api/place/nearbysearch/json",
-        {
-          params: {
-            location: `${lat},${lng}`,
-            radius: radius * 1000, // Convert km to meters
-            keyword: industry,
-            key: process.env.GOOGLE_PLACES_API_KEY,
-            pagetoken: nextPageToken,
-          },
-        }
-      );
+      const response = await axios.get("https://maps.googleapis.com/maps/api/place/nearbysearch/json", {
+        params: {
+          location: `${lat},${lng}`,
+          radius: radius * 1000,
+          keyword: industry,
+          key: process.env.GOOGLE_PLACES_API_KEY,
+          pagetoken: nextPageToken,
+        },
+      });
       places = places.concat(response.data.results);
       nextPageToken = response.data.next_page_token;
       if (nextPageToken) {
-        // Google API might need a delay to process the next page token
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 2000));
       }
     } while (nextPageToken);
 
     const detailedPlaces = await Promise.all(
       places.map(async (place) => {
-        const placeDetailsResponse = await axios.get(
-          "https://maps.googleapis.com/maps/api/place/details/json",
-          {
-            params: {
-              place_id: place.place_id,
-              fields:
-                "name,formatted_phone_number,website,formatted_address,place_id",
-              key: process.env.GOOGLE_PLACES_API_KEY,
-            },
-          }
-        );
+        const placeDetailsResponse = await axios.get("https://maps.googleapis.com/maps/api/place/details/json", {
+          params: {
+            place_id: place.place_id,
+            fields: "name,formatted_phone_number,website,formatted_address,place_id",
+            key: process.env.GOOGLE_PLACES_API_KEY,
+          },
+        });
         const details = placeDetailsResponse.data.result;
         return {
           id: details.place_id,
@@ -135,30 +118,21 @@ const fetchFromGooglePlaces = async (location, industry, radius) => {
   }
 };
 
-// Search Route
 app.get("/api/search", async (req, res) => {
   const { location, industry, radius } = req.query;
   const radiusLimit = parseInt(radius, 10) || 10;
 
   try {
-    // Check database first
-    const cachedCompanies = await collection
-      .find({ location, industry, radius: { $lte: radiusLimit } })
-      .toArray();
+    const cachedCompanies = await collection.find({ location, industry, radius: { $lte: radiusLimit } }).toArray();
     if (cachedCompanies.length > 0) {
       res.json(cachedCompanies);
     } else {
-      const companies = await fetchFromGooglePlaces(
-        location,
-        industry,
-        radiusLimit
-      );
+      const companies = await fetchFromGooglePlaces(location, industry, radiusLimit);
 
       if (companies.length > 0 && collection) {
         await collection.insertMany(companies, { ordered: false });
         console.log("Data inserted into MongoDB");
 
-        // Limit the database size to 1000 entries
         const count = await collection.countDocuments();
         if (count > 1000) {
           await collection.deleteMany({});
@@ -176,7 +150,6 @@ app.get("/api/search", async (req, res) => {
   }
 });
 
-// Delete Route
 app.delete("/api/delete", async (req, res) => {
   const { ids } = req.body;
 
