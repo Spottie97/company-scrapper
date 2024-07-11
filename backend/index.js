@@ -4,7 +4,7 @@ const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
-const port = 5001; // Use the port you've set
+const port = 5001;
 
 // Middleware
 app.use(cors());
@@ -15,22 +15,7 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-const fetchFromClearbit = async (location, industry) => {
-  try {
-    const response = await axios.get('https://company.clearbit.com/v2/companies/find', {
-      headers: {
-        'Authorization': `Bearer ${process.env.CLEARBIT_API_KEY}`
-      },
-      params: { location, industry }
-    });
-    const companies = response.data;
-    return Array.isArray(companies) ? companies.filter(company => company.metrics.employees < 100) : [];
-  } catch (error) {
-    console.error('Error fetching data from Clearbit:', error);
-    return [];
-  }
-};
-
+// Helper function to fetch data from Google Places API
 const fetchFromGooglePlaces = async (location, industry) => {
   try {
     const response = await axios.get('https://maps.googleapis.com/maps/api/place/textsearch/json', {
@@ -39,6 +24,7 @@ const fetchFromGooglePlaces = async (location, industry) => {
         key: process.env.GOOGLE_PLACES_API_KEY
       }
     });
+
     const places = response.data.results;
     return places.map(place => ({
       id: place.place_id,
@@ -54,58 +40,12 @@ const fetchFromGooglePlaces = async (location, industry) => {
   }
 };
 
-const fetchFromLinkedIn = async (location, industry) => {
-  // Implement LinkedIn API call here
-  // Placeholder implementation
-  return [
-    {
-      id: 2,
-      name: 'LinkedIn Company',
-      contact: 'linkedin@example.com',
-      location,
-      industry,
-      size: 50
-    }
-  ];
-};
-
-const fetchFromCrunchbase = async (location, industry) => {
-  // Implement Crunchbase API call here
-  // Placeholder implementation
-  return [
-    {
-      id: 3,
-      name: 'Crunchbase Company',
-      contact: 'crunchbase@example.com',
-      location,
-      industry,
-      size: 30
-    }
-  ];
-};
-
 // Search Route
 app.get('/api/search', async (req, res) => {
-  const { location, industry, api } = req.query;
+  const { location, industry } = req.query;
 
   try {
-    let companies;
-    switch (api) {
-      case 'LinkedIn':
-        companies = await fetchFromLinkedIn(location, industry);
-        break;
-      case 'Crunchbase':
-        companies = await fetchFromCrunchbase(location, industry);
-        break;
-      case 'GooglePlaces':
-        companies = await fetchFromGooglePlaces(location, industry);
-        break;
-      case 'Clearbit':
-      default:
-        companies = await fetchFromClearbit(location, industry);
-        break;
-    }
-
+    const companies = await fetchFromGooglePlaces(location, industry);
     res.json(companies);
   } catch (error) {
     console.error(error);
