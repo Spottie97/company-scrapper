@@ -4,12 +4,11 @@ import './App.css';
 function App() {
   const [location, setLocation] = useState('');
   const [industry, setIndustry] = useState('');
-  const [api, setApi] = useState('Clearbit');
   const [companies, setCompanies] = useState([]);
 
   const handleSearch = async () => {
     try {
-      const response = await fetch(`http://localhost:5001/api/search?location=${location}&industry=${industry}&api=${api}`);
+      const response = await fetch(`http://localhost:5001/api/search?location=${location}&industry=${industry}`);
       const data = await response.json();
 
       if (Array.isArray(data)) {
@@ -41,18 +40,12 @@ function App() {
             value={industry}
             onChange={e => setIndustry(e.target.value)}
           />
-          <select value={api} onChange={e => setApi(e.target.value)}>
-            <option value="Clearbit">Clearbit API</option>
-            <option value="LinkedIn">LinkedIn API</option>
-            <option value="Crunchbase">Crunchbase API</option>
-            <option value="GooglePlaces">Google Places API</option>
-          </select>
           <button onClick={handleSearch}>Search</button>
         </div>
         <ul className="company-list">
           {companies.map(company => (
             <li key={company.id}>
-              {company.name} - {company.contact}
+              {company.name} - {company.contact} - {company.location}
             </li>
           ))}
         </ul>
