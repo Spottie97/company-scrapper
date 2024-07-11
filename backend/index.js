@@ -1,8 +1,8 @@
+require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
 const { MongoClient } = require('mongodb');
-require('dotenv').config();
 
 const app = express();
 const port = 5001;
