@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Run the web service on container startup.
-CMD [ "npm", "start" ]
+CMD ["npm", "start"]
 
 # Inform Docker that the container listens on the specified port.
 EXPOSE 5001
