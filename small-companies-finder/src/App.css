@@ -18,7 +18,7 @@
   margin-bottom: 20px;
 }
 
-.search-form input {
+.search-form input, .search-form select {
   margin: 0 5px;
   padding: 10px;
   font-size: 16px;
@@ -30,15 +30,37 @@
   cursor: pointer;
 }
 
-.company-list {
-  list-style-type: none;
-  padding: 0;
+.company-table {
+  margin-top: 20px;
+  border-collapse: collapse;
+  width: 80%;
+  max-width: 800px;
 }
 
-.company-list li {
-  background: #61dafb;
-  margin: 10px 0;
+.company-table th,
+.company-table td {
+  border: 1px solid #61dafb;
   padding: 10px;
-  border-radius: 5px;
+  text-align: left;
+}
+
+.company-table th {
+  background-color: #61dafb;
   color: #282c34;
+}
+
+.company-table td {
+  background-color: #fff;
+  color: #282c34;
+}
+
+button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+input[type="range"] {
+  width: 100%;
 }
