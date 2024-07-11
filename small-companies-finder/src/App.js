@@ -10,9 +10,16 @@ function App() {
     try {
       const response = await fetch(`http://localhost:5001/api/search?location=${location}&industry=${industry}`);
       const data = await response.json();
-      setCompanies(data);
+  
+      if (Array.isArray(data)) {
+        setCompanies(data);
+      } else {
+        setCompanies([]);
+        console.error('Unexpected response format:', data);
+      }
     } catch (error) {
       console.error('Error fetching companies:', error);
+      setCompanies([]);
     }
   };
 

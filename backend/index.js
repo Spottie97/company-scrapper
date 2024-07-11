@@ -17,28 +17,32 @@ app.get('/', (req, res) => {
 
 // Search Route
 app.get('/api/search', async (req, res) => {
-  const { location, industry } = req.query;
+    const { location, industry } = req.query;
   
-  try {
-    const response = await axios.get('https://company.clearbit.com/v2/companies/find', {
-      headers: {
-        'Authorization': `Bearer ${process.env.CLEARBIT_API_KEY}`
-      },
-      params: {
-        location,
-        industry
-      }
-    });
-    const companies = response.data;
-
-    // Filter companies based on size
-    const filteredCompanies = companies.filter(company => company.metrics.employees < 100);
-
-    res.json(filteredCompanies);
-  } catch (error) {
-    res.status(500).json({ error: 'Error fetching companies' });
-  }
-});
+    try {
+      const response = await axios.get('https://company.clearbit.com/v2/companies/find', {
+        headers: {
+          'Authorization': `Bearer ${process.env.CLEARBIT_API_KEY}`
+        },
+        params: {
+          location,
+          industry
+        }
+      });
+  
+      console.log(response.data); // Log the response data
+      const companies = response.data;
+  
+      // Filter companies based on size
+      // Ensure the data is in array format before filtering
+      const filteredCompanies = Array.isArray(companies) ? companies.filter(company => company.metrics.employees < 100) : [];
+  
+      res.json(filteredCompanies);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error fetching companies' });
+    }
+  });
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
