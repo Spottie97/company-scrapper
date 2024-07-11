@@ -13,7 +13,6 @@ RUN npm install
 # Copy local code to the container image.
 COPY . .
 
-# Run the web service on container startup.
 CMD ["npm", "start"]
 
 # Inform Docker that the container listens on the specified port.
