@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
-const { MongoClient } = require('mongodb');
+const { MongoClient, ServerApiVersion } = require('mongodb');
 
 const app = express();
 const port = 5001;
@@ -12,19 +12,34 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB connection
-const uri = process.env.MONGO_URI;
-const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+const uri = process.env.MONGO_URI;  // Ensure MONGO_URI is defined in .env
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
+});
 
 let collection;
 
-client.connect(err => {
-  if (err) {
-    console.error('Error connecting to MongoDB:', err);
+async function connectToMongoDB() {
+  try {
+    // Connect the client to the server
+    await client.connect();
+    // Verify connection with a ping command
+    await client.db("admin").command({ ping: 1 });
+    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+
+    // Set the collection to be used
+    collection = client.db("companyData").collection("companies");
+  } catch (error) {
+    console.error('Error connecting to MongoDB:', error);
     process.exit(1);
   }
-  collection = client.db("companyData").collection("companies");
-  console.log('Connected to MongoDB');
-});
+}
+
+connectToMongoDB();
 
 // Basic Route
 app.get('/', (req, res) => {
