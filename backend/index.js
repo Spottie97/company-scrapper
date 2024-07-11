@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
+const { MongoClient } = require('mongodb');
 require('dotenv').config();
 
 const app = express();
@@ -9,6 +10,21 @@ const port = 5001;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// MongoDB connection
+const uri = process.env.MONGO_URI;
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+
+let collection;
+
+client.connect(err => {
+  if (err) {
+    console.error('Error connecting to MongoDB:', err);
+    process.exit(1);
+  }
+  collection = client.db("companyData").collection("companies");
+  console.log('Connected to MongoDB');
+});
 
 // Basic Route
 app.get('/', (req, res) => {
@@ -46,6 +62,13 @@ app.get('/api/search', async (req, res) => {
 
   try {
     const companies = await fetchFromGooglePlaces(location, industry);
+
+    // Insert fetched data into MongoDB
+    if (collection) {
+      await collection.insertMany(companies);
+      console.log('Data inserted into MongoDB');
+    }
+
     res.json(companies);
   } catch (error) {
     console.error(error);
