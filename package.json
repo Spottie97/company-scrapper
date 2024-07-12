@@ -1,10 +1,20 @@
-{
+  {
     "name": "company-scrapper",
     "version": "1.0.0",
-    "scripts": {
-      "start": "npm run start --prefix frontend",
-      "build": "npm run build --prefix frontend"
+    "description": "Scrapes area for companies with less than 100 employees",
+    "main": "main.js",
+    "dependencies": {
+      "axios": "^1.7.2",
+      "dotenv": "^16.4.5",
+      "mongodb": "^6.8.0",
+      "serverless-http": "^3.2.0"
     },
-    "dependencies": {},
-    "devDependencies": {}
+    "scripts": {
+      "start": "cd backend && npm start",
+      "build-frontend": "cd frontend && npm install && npm run build"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC"
   }
+  
