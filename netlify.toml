@@ -1,13 +1,11 @@
 [build]
-  base = "frontend"
-  publish = "build"
-  command = "npm run build"
+  publish = "frontend/build"
+  functions = "functions"
 
-[functions]
-  directory = "functions"
+[build.environment]
+  NODE_VERSION = "14"
 
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/search/:splat"
+  to = "/.netlify/functions/:splat"
   status = 200
-  force = true
