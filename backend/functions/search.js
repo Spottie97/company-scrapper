@@ -5,8 +5,10 @@ const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
 const { MongoClient, ServerApiVersion } = require("mongodb");
+const serverless = require("serverless-http");
 
 const app = express();
+const router = express.Router();
 const port = process.env.PORT || 5001;
 
 app.use(cors());
@@ -39,11 +41,11 @@ async function connectToMongoDB() {
 
 connectToMongoDB();
 
-app.get("/", (req, res) => {
+router.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-app.get("/api/industries", (req, res) => {
+router.get("/api/industries", (req, res) => {
   const industriesPath = path.join(__dirname, "industries.json");
   fs.readFile(industriesPath, "utf8", (err, data) => {
     if (err) {
@@ -118,7 +120,7 @@ const fetchFromGooglePlaces = async (location, industry, radius) => {
   }
 };
 
-app.get("/api/search", async (req, res) => {
+router.get("/api/search", async (req, res) => {
   const { location, industry, radius } = req.query;
   const radiusLimit = parseInt(radius, 10) || 10;
 
@@ -150,7 +152,7 @@ app.get("/api/search", async (req, res) => {
   }
 });
 
-app.delete("/api/delete", async (req, res) => {
+router.delete("/api/delete", async (req, res) => {
   const { ids } = req.body;
 
   try {
@@ -165,6 +167,6 @@ app.delete("/api/delete", async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
+app.use("/.netlify/functions/search", router);
+
+module.exports.handler = serverless(app);
