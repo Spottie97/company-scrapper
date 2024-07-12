@@ -9,11 +9,13 @@ function App() {
   const [selectedCompanies, setSelectedCompanies] = useState([]);
   const [industries, setIndustries] = useState([]);
 
+  const apiUrl = process.env.REACT_APP_API_URL;
+
   useEffect(() => {
     // Fetch industry data from backend
     const fetchIndustries = async () => {
       try {
-        const response = await fetch('http://localhost:5001/api/industries');
+        const response = await fetch(`${apiUrl}/industries`);
         const data = await response.json();
         
         // Check if the data is an array
@@ -28,11 +30,11 @@ function App() {
     };
 
     fetchIndustries();
-  }, []);
+  }, [apiUrl]);
 
   const handleSearch = async () => {
     try {
-      const response = await fetch(`http://localhost:5001/api/search?location=${location}&industry=${industry}&radius=${radius}`);
+      const response = await fetch(`${apiUrl}/search?location=${location}&industry=${industry}&radius=${radius}`);
       const data = await response.json();
 
       if (Array.isArray(data)) {
@@ -64,7 +66,7 @@ function App() {
 
   const handleDeleteSelected = async () => {
     try {
-      const response = await fetch(`http://localhost:5001/api/delete`, {
+      const response = await fetch(`${apiUrl}/delete`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'

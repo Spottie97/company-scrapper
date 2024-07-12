@@ -1,14 +1,14 @@
 require("dotenv").config();
 const express = require("express");
-const serverless = require("serverless-http");
 const axios = require("axios");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
 const { MongoClient, ServerApiVersion } = require("mongodb");
+const serverless = require("serverless-http");
 
 const app = express();
-const router = express.Router();
+const port = process.env.PORT || 5001;
 
 app.use(cors());
 app.use(express.json());
@@ -40,11 +40,11 @@ async function connectToMongoDB() {
 
 connectToMongoDB();
 
-router.get("/", (req, res) => {
+app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-router.get("/api/industries", (req, res) => {
+app.get("/api/industries", (req, res) => {
   const industriesPath = path.join(__dirname, "industries.json");
   fs.readFile(industriesPath, "utf8", (err, data) => {
     if (err) {
@@ -119,7 +119,7 @@ const fetchFromGooglePlaces = async (location, industry, radius) => {
   }
 };
 
-router.get("/api/search", async (req, res) => {
+app.get("/api/search", async (req, res) => {
   const { location, industry, radius } = req.query;
   const radiusLimit = parseInt(radius, 10) || 10;
 
@@ -151,7 +151,7 @@ router.get("/api/search", async (req, res) => {
   }
 });
 
-router.delete("/api/delete", async (req, res) => {
+app.delete("/api/delete", async (req, res) => {
   const { ids } = req.body;
 
   try {
@@ -166,7 +166,4 @@ router.delete("/api/delete", async (req, res) => {
   }
 });
 
-app.use("/.netlify/functions/api", router);
-
-module.exports = app;
 module.exports.handler = serverless(app);
