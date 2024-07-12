@@ -8,36 +8,11 @@
     "dotenv": "^16.4.5",
     "mongodb": "^6.8.0"
   },
-  "devDependencies": {
-    "electron": "^31.2.0",
-    "electron-builder": "^24.13.3"
-  },
   "scripts": {
-    "start": "electron .",
-    "build": "electron-builder",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "cd backend && npm start",
     "build-frontend": "cd frontend && npm install && npm run build"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "build": {
-    "appId": "com.company.finder",
-    "directories": {
-      "output": "dist"
-    },
-    "files": [
-      "build/**/*",
-      "main.js",
-      "package.json",
-      "backend/**/*",
-      "frontend/build/**/*"
-    ],
-    "win": {
-      "target": "nsis"
-    },
-    "mac": {
-      "target": "dmg"
-    }
-  }
+  "license": "ISC"
 }
