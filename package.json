@@ -2,9 +2,10 @@
     "name": "company-scrapper",
     "version": "1.0.0",
     "scripts": {
-      "start": "npm run start --prefix frontend",
-      "build": "npm run build --prefix frontend"
+        "start": "npm run start --prefix frontend",
+        "build": "npm run build --prefix frontend"
     },
-    "dependencies": {},
-    "devDependencies": {}
-  }
+    "dependencies": {
+        "react-dom": "^18.3.1"
+    }
+}
