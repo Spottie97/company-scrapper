@@ -3,18 +3,15 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "start:lambda": "netlify-lambda serve src",
+    "build": "netlify-lambda build src"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "axios": "^0.21.1",
     "cors": "^2.8.5",
-    "dotenv": "^10.0.0",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "mongodb": "^3.6.3",
-    "netlify-lambda": "^2.0.16",
-    "serverless-http": "^3.2.0"
+    "mongodb": "^3.6.3"
   }
 }
