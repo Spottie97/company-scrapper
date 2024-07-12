@@ -1,13 +1,13 @@
 [build]
-  base = "/frontend"
+  base = "frontend"
   publish = "build"
   command = "npm run build"
 
-[context.production.environment]
-  REACT_APP_API_URL = "/api"
+[functions]
+  directory = "functions"
 
 [[redirects]]
   from = "/api/*"
-  to = "http://localhost:5001/:splat"
+  to = "/.netlify/functions/search/:splat"
   status = 200
   force = true
