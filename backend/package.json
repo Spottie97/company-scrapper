@@ -4,14 +4,19 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "start:lambda": "netlify-lambda serve src",
     "build": "netlify-lambda build src"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
+    "express": "^4.17.1",
     "axios": "^0.21.1",
     "cors": "^2.8.5",
-    "dotenv": "^8.2.0",
-    "express": "^4.17.1",
-    "mongodb": "^3.6.3"
+    "mongodb": "^3.6.3",
+    "dotenv": "^10.0.0"
+  },
+  "devDependencies": {
+    "netlify-lambda": "^2.0.0"
   }
 }

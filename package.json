@@ -2,10 +2,16 @@
     "name": "company-scrapper",
     "version": "1.0.0",
     "scripts": {
-        "start": "npm run start --prefix frontend",
-        "build": "npm run build --prefix frontend"
+        "install:frontend": "cd frontend && npm install",
+        "install:backend": "cd backend && npm install",
+        "build:frontend": "cd frontend && npm run build",
+        "build:backend": "cd backend && npm run build",
+        "build": "npm run install:frontend && npm run install:backend && npm run build:frontend && npm run build:backend"
     },
     "dependencies": {
         "react-dom": "^18.3.1"
+    },
+    "devDependencies": {
+        "netlify-lambda": "^2.0.16"
     }
 }
