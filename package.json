@@ -1,17 +1,21 @@
 {
     "name": "company-scrapper",
     "version": "1.0.0",
-    "scripts": {
-        "install:frontend": "cd frontend && npm install",
-        "install:backend": "cd backend && npm install",
-        "build:frontend": "cd frontend && npm run build",
-        "build:backend": "cd backend && npm run build",
-        "build": "npm run install:frontend && npm run install:backend && npm run build:frontend && npm run build:backend"
-    },
+    "description": "Scrapes area for companies with less than 100 employees",
+    "main": "main.js",
     "dependencies": {
-        "react-dom": "^18.3.1"
+      "axios": "^1.7.2",
+      "dotenv": "^16.4.5",
+      "mongodb": "^6.8.0"
     },
-    "devDependencies": {
-        "netlify-lambda": "^2.0.16"
-    }
-}
+    "scripts": {
+      "install:frontend": "cd frontend && npm install",
+      "install:backend": "cd backend && npm install",
+      "build:frontend": "cd frontend && npm run build",
+      "build:backend": "cd backend && npm run build",
+      "build": "npm run install:frontend && npm run install:backend && npm run build:frontend && npm run build:backend"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC"
+  }
