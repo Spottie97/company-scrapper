@@ -14,6 +14,11 @@ app.use(cors());
 app.use(express.json());
 
 const uri = process.env.MONGO_URI;
+if (!uri) {
+  console.error("MONGO_URI environment variable not set");
+  process.exit(1);
+}
+
 const client = new MongoClient(uri, {
   useUnifiedTopology: true,
   serverApi: {
@@ -44,7 +49,7 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-app.get("/api/industries", (req, res) => {
+app.get("/.netlify/functions/index/industries", (req, res) => { // Update this route to match Netlify function URL structure
   const industriesPath = path.join(__dirname, "industries.json");
   fs.readFile(industriesPath, "utf8", (err, data) => {
     if (err) {
@@ -119,7 +124,7 @@ const fetchFromGooglePlaces = async (location, industry, radius) => {
   }
 };
 
-app.get("/api/search", async (req, res) => {
+app.get("/.netlify/functions/index/search", async (req, res) => { // Update this route to match Netlify function URL structure
   const { location, industry, radius } = req.query;
   const radiusLimit = parseInt(radius, 10) || 10;
 
@@ -151,7 +156,7 @@ app.get("/api/search", async (req, res) => {
   }
 });
 
-app.delete("/api/delete", async (req, res) => {
+app.delete("/.netlify/functions/index/delete", async (req, res) => { // Update this route to match Netlify function URL structure
   const { ids } = req.body;
 
   try {
@@ -165,5 +170,11 @@ app.delete("/api/delete", async (req, res) => {
     res.status(500).json({ error: "Error deleting data" });
   }
 });
+
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}`);
+  });
+}
 
 module.exports.handler = serverless(app);
