@@ -3,8 +3,10 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 const axios = require('axios');
 const router = express.Router();
 
-const uri = process.env.MONGO_URI;
-const client = new MongoClient(uri, {
+const MONGO_URI = process.env.MONGO_URI;
+const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
+
+const client = new MongoClient(MONGO_URI, {
   useUnifiedTopology: true,
   serverApi: {
     version: ServerApiVersion.v1,
@@ -29,9 +31,9 @@ connectToMongoDB();
 
 const fetchFromGooglePlaces = async (location, industry, radius) => {
   try {
-    const geocodeResponse = await axios.get("https://maps.googleapis.com/maps/api/geocode/json", {
-      params: { address: location, key: process.env.GOOGLE_PLACES_API_KEY }
-    });
+    const url = `https://maps.googleapis.com/maps/api/geocode/json`;
+    const params = { address: location, key: GOOGLE_PLACES_API_KEY };
+    const geocodeResponse = await axios.get(url, { params });
 
     if (!geocodeResponse.data.results.length) {
       throw new Error("No geocoding results found");
@@ -79,8 +81,7 @@ const fetchFromGooglePlaces = async (location, industry, radius) => {
 
     return detailedPlaces;
   } catch (error) {
-    console.error("Error fetching data from Google Places:", error.message);
-    return [];
+    console.error("Error fetching from Google Places:", error);
   }
 };
 
