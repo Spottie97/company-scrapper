@@ -1,9 +1,7 @@
 [build]
   command = "npm install --prefix frontend && npm install --prefix backend && npm run build --prefix frontend"
   publish = "frontend/build"
-
-[functions]
-  directory = "backend"
+  functions = "backend"
 
 [[plugins]]
   package = "@netlify/plugin-functions-install-core"
