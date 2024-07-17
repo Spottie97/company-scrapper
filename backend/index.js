@@ -1,17 +1,19 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const serverless = require("serverless-http");
-const industriesRoute = require("./routes/industries");
-const searchRoute = require("./routes/search");
-const deleteRoute = require("./routes/delete");
+require('dotenv').config();
+
+const express = require('express');
+const cors = require('cors');
+const serverless = require('serverless-http');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use('/.netlify/functions', industriesRoute);
-app.use('/.netlify/functions', searchRoute);
-app.use('/.netlify/functions', deleteRoute);
+const routes = [
+  require('./routes/industries'),
+  require('./routes/search'),
+  require('./routes/delete'),
+];
+
+routes.forEach((route) => app.use('/.netlify/functions', route));
 
 module.exports.handler = serverless(app);
