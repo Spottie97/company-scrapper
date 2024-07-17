@@ -13,7 +13,7 @@ function App() {
   useEffect(() => {
     const fetchIndustries = async () => {
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/industries`);
+        const response = await fetch('/api/industries');
         const data = await response.json();
         if (Array.isArray(data)) {
           setIndustries(data);

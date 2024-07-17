@@ -6,7 +6,7 @@ const app = express();
 
 app.get('/industries', async (req, res) => {
   try {
-    const industriesPath = path.join(__dirname, '../data/industries.json');
+    const industriesPath = path.join(__dirname, './industries.json');
     const data = await fs.readFile(industriesPath, 'utf8');
     res.json(JSON.parse(data));
   } catch (err) {
