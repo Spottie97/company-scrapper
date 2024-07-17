@@ -31,7 +31,7 @@ function App() {
   // Handle search action
   const handleSearch = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/search?location=${location}&industry=${industry}&radius=${radius}`);
+      const response = await fetch(`/api/search?location=${location}&industry=${industry}&radius=${radius}`);
       const data = await response.json();
       if (Array.isArray(data)) {
         setCompanies(data);
@@ -61,7 +61,7 @@ function App() {
   // Handle deletion of selected companies
   const handleDeleteSelected = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/delete`, {
+      const response = await fetch(`/api/delete`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
