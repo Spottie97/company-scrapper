@@ -25,7 +25,7 @@ async function connectToMongoDB() {
 
 const collectionPromise = connectToMongoDB();
 
-router.delete('/delete', async (req, res) => {
+router.delete('/', async (req, res) => {
   const { ids } = req.body;
 
   try {
@@ -37,3 +37,5 @@ router.delete('/delete', async (req, res) => {
     res.status(500).json({ error: "Error deleting data" });
   }
 });
+
+module.exports = router;

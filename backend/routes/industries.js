@@ -1,15 +1,12 @@
 const express = require('express');
-const fs = require('fs');
+const fs = require('fs').promises;
 const path = require('path');
-const serverless = require('serverless-http');
-
-const app = express();
 const router = express.Router();
 
-router.get('/industries', async (req, res) => {
+router.get('/', async (req, res) => {
   try {
-    const industriesPath = path.join(__dirname, 'industries.json');
-    const data = await fs.promises.readFile(industriesPath, 'utf8');
+    const industriesPath = path.join(__dirname, '../data/industries.json');
+    const data = await fs.readFile(industriesPath, 'utf8');
     res.json(JSON.parse(data));
   } catch (err) {
     console.error('Error reading industries file:', err);
@@ -17,6 +14,4 @@ router.get('/industries', async (req, res) => {
   }
 });
 
-app.use('/.netlify/functions', router);
-
-module.exports.handler = serverless(app);
+module.exports = router;

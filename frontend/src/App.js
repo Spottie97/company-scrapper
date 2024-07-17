@@ -9,6 +9,7 @@ function App() {
   const [selectedCompanies, setSelectedCompanies] = useState([]);
   const [industries, setIndustries] = useState([]);
 
+  // Fetch industries from the API on component mount
   useEffect(() => {
     const fetchIndustries = async () => {
       try {
@@ -27,6 +28,7 @@ function App() {
     fetchIndustries();
   }, []);
 
+  // Handle search action
   const handleSearch = async () => {
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/search?location=${location}&industry=${industry}&radius=${radius}`);
@@ -44,20 +46,19 @@ function App() {
     }
   };
 
+  // Handle company selection for deletion
   const handleSelectCompany = (id) => {
     setSelectedCompanies(prevSelected =>
       prevSelected.includes(id) ? prevSelected.filter(companyId => companyId !== id) : [...prevSelected, id]
     );
   };
 
+  // Handle select/deselect all companies
   const handleSelectAll = () => {
-    if (selectedCompanies.length === companies.length) {
-      setSelectedCompanies([]);
-    } else {
-      setSelectedCompanies(companies.map(company => company.id));
-    }
+    setSelectedCompanies(selectedCompanies.length === companies.length ? [] : companies.map(company => company.id));
   };
 
+  // Handle deletion of selected companies
   const handleDeleteSelected = async () => {
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/delete`, {
@@ -113,7 +114,13 @@ function App() {
             <table className="company-table">
               <thead>
                 <tr>
-                  <th><input type="checkbox" checked={selectedCompanies.length === companies.length && companies.length > 0} onChange={handleSelectAll} /></th>
+                  <th>
+                    <input
+                      type="checkbox"
+                      checked={selectedCompanies.length === companies.length && companies.length > 0}
+                      onChange={handleSelectAll}
+                    />
+                  </th>
                   <th>Name</th>
                   <th>Contact</th>
                   <th>Location</th>
@@ -124,12 +131,22 @@ function App() {
               <tbody>
                 {companies.map(company => (
                   <tr key={company.id}>
-                    <td><input type="checkbox" checked={selectedCompanies.includes(company.id)} onChange={() => handleSelectCompany(company.id)} /></td>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={selectedCompanies.includes(company.id)}
+                        onChange={() => handleSelectCompany(company.id)}
+                      />
+                    </td>
                     <td>{company.name}</td>
                     <td>{company.contact}</td>
                     <td>{company.location}</td>
                     <td>{company.industry}</td>
-                    <td><a href={company.website} target="_blank" rel="noopener noreferrer">{company.website}</a></td>
+                    <td>
+                      <a href={company.website} target="_blank" rel="noopener noreferrer">
+                        {company.website}
+                      </a>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -138,7 +155,9 @@ function App() {
             <p>No companies found for the specified criteria.</p>
           )}
         </div>
-        {selectedCompanies.length > 0 && <button onClick={handleDeleteSelected}>Delete Selected</button>}
+        {selectedCompanies.length > 0 && (
+          <button onClick={handleDeleteSelected}>Delete Selected</button>
+        )}
       </header>
     </div>
   );

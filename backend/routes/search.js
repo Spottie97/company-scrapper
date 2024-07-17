@@ -31,9 +31,9 @@ connectToMongoDB();
 
 const fetchFromGooglePlaces = async (location, industry, radius) => {
   try {
-    const url = `https://maps.googleapis.com/maps/api/geocode/json`;
-    const params = { address: location, key: GOOGLE_PLACES_API_KEY };
-    const geocodeResponse = await axios.get(url, { params });
+    const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json`;
+    const geocodeParams = { address: location, key: GOOGLE_PLACES_API_KEY };
+    const geocodeResponse = await axios.get(geocodeUrl, { params: geocodeParams });
 
     if (!geocodeResponse.data.results.length) {
       throw new Error("No geocoding results found");
@@ -44,17 +44,17 @@ const fetchFromGooglePlaces = async (location, industry, radius) => {
     let nextPageToken;
 
     do {
-      const response = await axios.get("https://maps.googleapis.com/maps/api/place/nearbysearch/json", {
+      const placesResponse = await axios.get("https://maps.googleapis.com/maps/api/place/nearbysearch/json", {
         params: {
           location: `${lat},${lng}`,
           radius: radius * 1000,
           keyword: industry,
-          key: process.env.GOOGLE_PLACES_API_KEY,
+          key: GOOGLE_PLACES_API_KEY,
           pagetoken: nextPageToken,
         },
       });
-      places = places.concat(response.data.results);
-      nextPageToken = response.data.next_page_token;
+      places = places.concat(placesResponse.data.results);
+      nextPageToken = placesResponse.data.next_page_token;
       if (nextPageToken) {
         await new Promise(resolve => setTimeout(resolve, 2000));
       }
@@ -65,7 +65,7 @@ const fetchFromGooglePlaces = async (location, industry, radius) => {
         params: {
           place_id: place.place_id,
           fields: "name,formatted_phone_number,website,formatted_address,place_id",
-          key: process.env.GOOGLE_PLACES_API_KEY,
+          key: GOOGLE_PLACES_API_KEY,
         },
       });
       const details = placeDetailsResponse.data.result;
@@ -82,10 +82,11 @@ const fetchFromGooglePlaces = async (location, industry, radius) => {
     return detailedPlaces;
   } catch (error) {
     console.error("Error fetching from Google Places:", error);
+    return [];
   }
 };
 
-router.get('/search', async (req, res) => {
+router.get('/', async (req, res) => {
   const { location, industry, radius } = req.query;
   const radiusLimit = parseInt(radius, 10) || 10;
 

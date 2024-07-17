@@ -8,12 +8,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const routes = [
-  require('./routes/industries'),
-  require('./routes/search'),
-  require('./routes/delete'),
-];
+const industriesRouter = require('./routes/industries');
+const searchRouter = require('./routes/search');
+const deleteRouter = require('./routes/delete');
 
-routes.forEach((route) => app.use('/.netlify/functions', route));
+app.use('/.netlify/functions/industries', industriesRouter);
+app.use('/.netlify/functions/search', searchRouter);
+app.use('/.netlify/functions/delete', deleteRouter);
 
 module.exports.handler = serverless(app);
