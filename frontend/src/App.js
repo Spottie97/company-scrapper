@@ -29,18 +29,17 @@ function App() {
       const geocodeParams = { address: location, key: GOOGLE_PLACES_API_KEY };
       console.log("Requesting geocode for location:", location);
       const geocodeResponse = await axios.get(geocodeUrl, { params: geocodeParams });
-  
       console.log("Geocode response:", geocodeResponse.data);
   
       if (!geocodeResponse.data.results.length) {
         console.error("No geocoding results found for location:", location);
         return [];
       }
-
+  
       const { lat, lng } = geocodeResponse.data.results[0].geometry.location;
       let places = [];
       let nextPageToken;
-
+  
       do {
         const placesResponse = await axios.get("https://maps.googleapis.com/maps/api/place/nearbysearch/json", {
           params: {
@@ -57,7 +56,7 @@ function App() {
           await new Promise(resolve => setTimeout(resolve, 2000));
         }
       } while (nextPageToken);
-
+  
       const detailedPlaces = await Promise.all(places.map(async (place) => {
         const placeDetailsResponse = await axios.get("https://maps.googleapis.com/maps/api/place/details/json", {
           params: {
@@ -76,13 +75,14 @@ function App() {
           industry,
         };
       }));
-
+  
       return detailedPlaces;
     } catch (error) {
       console.error("Error fetching from Google Places:", error);
       return [];
     }
   };
+  
 
   const handleSearch = async () => {
     const cacheKey = `${location}-${industry}-${radius}`;
