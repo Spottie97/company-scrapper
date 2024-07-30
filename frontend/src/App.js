@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './App.css';
+import axios from 'axios';
 
 function App() {
   const [location, setLocation] = useState('');
@@ -8,76 +8,95 @@ function App() {
   const [companies, setCompanies] = useState([]);
   const [selectedCompanies, setSelectedCompanies] = useState([]);
   const [industries, setIndustries] = useState([]);
+  const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
 
-  // Fetch industries from the API on component mount
-  useEffect(() => {
-    const fetchIndustries = async () => {
-      try {
-        const response = await fetch('/api/industries');
-        const data = await response.json();
-        if (Array.isArray(data)) {
-          setIndustries(data);
-        } else {
-          console.error('Unexpected industry data format:', data);
-        }
-      } catch (error) {
-        console.error('Error fetching industries:', error);
-      }
-    };
-
-    fetchIndustries();
-  }, []);
-
-  // Handle search action
-  const handleSearch = async () => {
+  const fetchIndustries = async () => {
     try {
-      const response = await fetch(`/api/search?location=${location}&industry=${industry}&radius=${radius}`);
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        setCompanies(data);
-        setSelectedCompanies([]);
-      } else {
-        setCompanies([]);
-        console.error('Unexpected response format:', data);
-      }
+      const response = await axios.get('/path/to/industries.json');
+      setIndustries(response.data);
     } catch (error) {
-      console.error('Error fetching companies:', error);
-      setCompanies([]);
+      console.error('Error fetching industries:', error);
     }
   };
 
-  // Handle company selection for deletion
+  useEffect(() => {
+    fetchIndustries();
+  }, []);
+
+  const fetchFromGooglePlaces = async () => {
+    try {
+      const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json`;
+      const geocodeParams = { address: location, key: GOOGLE_PLACES_API_KEY };
+      const geocodeResponse = await axios.get(geocodeUrl, { params: geocodeParams });
+
+      if (!geocodeResponse.data.results.length) {
+        console.error("No geocoding results found");
+        return;
+      }
+
+      const { lat, lng } = geocodeResponse.data.results[0].geometry.location;
+      let places = [];
+      let nextPageToken;
+
+      do {
+        const placesResponse = await axios.get("https://maps.googleapis.com/maps/api/place/nearbysearch/json", {
+          params: {
+            location: `${lat},${lng}`,
+            radius: radius * 1000,
+            keyword: industry,
+            key: GOOGLE_PLACES_API_KEY,
+            pagetoken: nextPageToken,
+          },
+        });
+        places = places.concat(placesResponse.data.results);
+        nextPageToken = placesResponse.data.next_page_token;
+        if (nextPageToken) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      } while (nextPageToken);
+
+      const detailedPlaces = await Promise.all(places.map(async (place) => {
+        const placeDetailsResponse = await axios.get("https://maps.googleapis.com/maps/api/place/details/json", {
+          params: {
+            place_id: place.place_id,
+            fields: "name,formatted_phone_number,website,formatted_address,place_id",
+            key: GOOGLE_PLACES_API_KEY,
+          },
+        });
+        const details = placeDetailsResponse.data.result;
+        return {
+          id: details.place_id,
+          name: details.name,
+          contact: details.formatted_phone_number || "N/A",
+          location: details.formatted_address,
+          website: details.website || "N/A",
+          industry,
+        };
+      }));
+
+      setCompanies(detailedPlaces);
+    } catch (error) {
+      console.error("Error fetching from Google Places:", error);
+    }
+  };
+
+  const handleSearch = () => {
+    fetchFromGooglePlaces();
+  };
+
   const handleSelectCompany = (id) => {
     setSelectedCompanies(prevSelected =>
       prevSelected.includes(id) ? prevSelected.filter(companyId => companyId !== id) : [...prevSelected, id]
     );
   };
 
-  // Handle select/deselect all companies
   const handleSelectAll = () => {
     setSelectedCompanies(selectedCompanies.length === companies.length ? [] : companies.map(company => company.id));
   };
 
-  // Handle deletion of selected companies
-  const handleDeleteSelected = async () => {
-    try {
-      const response = await fetch(`/api/delete`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ ids: selectedCompanies })
-      });
-
-      if (response.ok) {
-        setCompanies(prevCompanies => prevCompanies.filter(company => !selectedCompanies.includes(company.id)));
-        setSelectedCompanies([]);
-      } else {
-        console.error('Failed to delete selected companies');
-      }
-    } catch (error) {
-      console.error('Error deleting selected companies:', error);
-    }
+  const handleDeleteSelected = () => {
+    setCompanies(prevCompanies => prevCompanies.filter(company => !selectedCompanies.includes(company.id)));
+    setSelectedCompanies([]);
   };
 
   return (
