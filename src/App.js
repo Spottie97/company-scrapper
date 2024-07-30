@@ -32,26 +32,17 @@ function App() {
         },
       });
   
-      if (!response.data.results.length) {
+      if (!response.data.length) {
         console.error("No results found");
         return [];
       }
   
-      const detailedPlaces = response.data.results.map(place => ({
-        id: place.place_id,
-        name: place.name,
-        contact: place.formatted_phone_number || "N/A",
-        location: place.formatted_address,
-        website: place.website || "N/A",
-        industry,
-      }));
-  
-      return detailedPlaces;
+      return response.data; // This now contains detailed place information
     } catch (error) {
       console.error("Error fetching from Google Places:", error);
       return [];
     }
-  };    
+  };   
   
   const handleSearch = async () => {
     const cacheKey = `${location}-${industry}-${radius}`;
