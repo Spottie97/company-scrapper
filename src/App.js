@@ -24,7 +24,7 @@ function App() {
 
   const fetchFromGooglePlaces = async (location, industry, radius) => {
     try {
-      const response = await axios.get('/api/places.js', {
+      const response = await axios.get('/api/places', {
         params: {
           location,
           radius,
