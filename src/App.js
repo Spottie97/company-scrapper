@@ -80,7 +80,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Company Finder</h1>
+        <h1>Scrappy</h1>
         <div className="search-form">
           <input
             type="text"
