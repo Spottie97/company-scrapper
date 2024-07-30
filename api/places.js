@@ -2,7 +2,7 @@ const axios = require('axios');
 
 module.exports = async (req, res) => {
   const { location, radius, keyword } = req.query;
-  const GOOGLE_PLACES_API_KEY = process.env.REACT_APP_GOOGLE_PLACES_API_KEY;
+  const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
 
   try {
     // Step 1: Use the Geocoding API to get the coordinates for the location
@@ -25,7 +25,7 @@ module.exports = async (req, res) => {
     const placesResponse = await axios.get(placesUrl, {
       params: {
         location: `${lat},${lng}`,
-        radius: radius * 1000, // Convert to meters
+        radius: radius * 1000,
         keyword,
         key: GOOGLE_PLACES_API_KEY,
       },
