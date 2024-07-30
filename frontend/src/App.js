@@ -13,7 +13,7 @@ function App() {
 
   const fetchIndustries = async () => {
     try {
-      const response = await axios.get('./industries.json');
+      const response = await axios.get('/industries.json');
       setIndustries(response.data);
     } catch (error) {
       console.error('Error fetching industries:', error);
@@ -28,12 +28,14 @@ function App() {
     try {
       const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json`;
       const geocodeParams = { address: location, key: GOOGLE_PLACES_API_KEY };
+      console.log("Requesting geocode for location:", location);
       const geocodeResponse = await axios.get(geocodeUrl, { params: geocodeParams });
-
+  
       if (!geocodeResponse.data.results.length) {
-        console.error("No geocoding results found");
+        console.error("No geocoding results found for location:", location);
         return;
       }
+  
 
       const { lat, lng } = geocodeResponse.data.results[0].geometry.location;
       let places = [];
