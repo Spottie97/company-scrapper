@@ -7,35 +7,32 @@ function App() {
   const [industry, setIndustry] = useState('');
   const [radius, setRadius] = useState(10);
   const [companies, setCompanies] = useState([]);
-  const [selectedCompanies, setSelectedCompanies] = useState([]);
   const [industries, setIndustries] = useState([]);
+  const [selectedCompanies, setSelectedCompanies] = useState([]);
   const GOOGLE_PLACES_API_KEY = process.env.REACT_APP_GOOGLE_PLACES_API_KEY;
 
-  const fetchIndustries = async () => {
-    try {
-      const response = await axios.get('/industries.json');
-      setIndustries(response.data);
-    } catch (error) {
-      console.error('Error fetching industries:', error);
-    }
-  };
-
   useEffect(() => {
+    const fetchIndustries = async () => {
+      try {
+        const response = await axios.get('/industries.json');
+        setIndustries(response.data);
+      } catch (err) {
+        console.error('Error fetching industries:', err);
+      }
+    };
     fetchIndustries();
   }, []);
 
-  const fetchFromGooglePlaces = async () => {
+  const fetchFromGooglePlaces = async (location, industry, radius) => {
     try {
       const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json`;
       const geocodeParams = { address: location, key: GOOGLE_PLACES_API_KEY };
-      console.log("Requesting geocode for location:", location);
       const geocodeResponse = await axios.get(geocodeUrl, { params: geocodeParams });
-  
+
       if (!geocodeResponse.data.results.length) {
-        console.error("No geocoding results found for location:", location);
-        return;
+        console.error("No geocoding results found");
+        return [];
       }
-  
 
       const { lat, lng } = geocodeResponse.data.results[0].geometry.location;
       let places = [];
@@ -77,14 +74,23 @@ function App() {
         };
       }));
 
-      setCompanies(detailedPlaces);
+      return detailedPlaces;
     } catch (error) {
       console.error("Error fetching from Google Places:", error);
+      return [];
     }
   };
 
-  const handleSearch = () => {
-    fetchFromGooglePlaces();
+  const handleSearch = async () => {
+    const cacheKey = `${location}-${industry}-${radius}`;
+    const cachedCompanies = JSON.parse(localStorage.getItem(cacheKey)) || [];
+    if (cachedCompanies.length > 0) {
+      setCompanies(cachedCompanies);
+    } else {
+      const companies = await fetchFromGooglePlaces(location, industry, radius);
+      setCompanies(companies);
+      localStorage.setItem(cacheKey, JSON.stringify(companies));
+    }
   };
 
   const handleSelectCompany = (id) => {
@@ -98,14 +104,17 @@ function App() {
   };
 
   const handleDeleteSelected = () => {
-    setCompanies(prevCompanies => prevCompanies.filter(company => !selectedCompanies.includes(company.id)));
+    const remainingCompanies = companies.filter(company => !selectedCompanies.includes(company.id));
+    setCompanies(remainingCompanies);
     setSelectedCompanies([]);
+    const cacheKey = `${location}-${industry}-${radius}`;
+    localStorage.setItem(cacheKey, JSON.stringify(remainingCompanies));
   };
 
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Scrap my location</h1>
+        <h1>Company Finder</h1>
         <div className="search-form">
           <input
             type="text"
@@ -139,7 +148,7 @@ function App() {
                   <th>
                     <input
                       type="checkbox"
-                      checked={selectedCompanies.length === companies.length && companies.length > 0}
+                      checked={selectedCompanies.length === companies.length}
                       onChange={handleSelectAll}
                     />
                   </th>
