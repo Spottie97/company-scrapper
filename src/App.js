@@ -9,7 +9,6 @@ function App() {
   const [companies, setCompanies] = useState([]);
   const [industries, setIndustries] = useState([]);
   const [selectedCompanies, setSelectedCompanies] = useState([]);
-  const GOOGLE_PLACES_API_KEY = process.env.REACT_APP_GOOGLE_PLACES_API_KEY;
 
   useEffect(() => {
     const fetchIndustries = async () => {
@@ -25,55 +24,26 @@ function App() {
 
   const fetchFromGooglePlaces = async (location, industry, radius) => {
     try {
-      const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json`;
-      const geocodeParams = { address: location, key: GOOGLE_PLACES_API_KEY };
-      console.log("Requesting geocode for location:", location);
-      const geocodeResponse = await axios.get(geocodeUrl, { params: geocodeParams });
-      console.log("Geocode response:", geocodeResponse.data);
+      const response = await axios.get('/api/places.js', {
+        params: {
+          location,
+          radius,
+          keyword: industry,
+        },
+      });
   
-      if (!geocodeResponse.data.results.length) {
-        console.error("No geocoding results found for location:", location);
+      if (!response.data.results.length) {
+        console.error("No results found");
         return [];
       }
   
-      const { lat, lng } = geocodeResponse.data.results[0].geometry.location;
-      let places = [];
-      let nextPageToken;
-  
-      do {
-        const placesResponse = await axios.get("https://maps.googleapis.com/maps/api/place/nearbysearch/json", {
-          params: {
-            location: `${lat},${lng}`,
-            radius: radius * 1000,
-            keyword: industry,
-            key: GOOGLE_PLACES_API_KEY,
-            pagetoken: nextPageToken,
-          },
-        });
-        places = places.concat(placesResponse.data.results);
-        nextPageToken = placesResponse.data.next_page_token;
-        if (nextPageToken) {
-          await new Promise(resolve => setTimeout(resolve, 2000));
-        }
-      } while (nextPageToken);
-  
-      const detailedPlaces = await Promise.all(places.map(async (place) => {
-        const placeDetailsResponse = await axios.get("https://maps.googleapis.com/maps/api/place/details/json", {
-          params: {
-            place_id: place.place_id,
-            fields: "name,formatted_phone_number,website,formatted_address,place_id",
-            key: GOOGLE_PLACES_API_KEY,
-          },
-        });
-        const details = placeDetailsResponse.data.result;
-        return {
-          id: details.place_id,
-          name: details.name,
-          contact: details.formatted_phone_number || "N/A",
-          location: details.formatted_address,
-          website: details.website || "N/A",
-          industry,
-        };
+      const detailedPlaces = response.data.results.map(place => ({
+        id: place.place_id,
+        name: place.name,
+        contact: place.formatted_phone_number || "N/A",
+        location: place.formatted_address,
+        website: place.website || "N/A",
+        industry,
       }));
   
       return detailedPlaces;
@@ -81,9 +51,8 @@ function App() {
       console.error("Error fetching from Google Places:", error);
       return [];
     }
-  };
+  };  
   
-
   const handleSearch = async () => {
     const cacheKey = `${location}-${industry}-${radius}`;
     const cachedCompanies = JSON.parse(localStorage.getItem(cacheKey)) || [];

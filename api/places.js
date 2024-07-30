@@ -2,7 +2,7 @@ const axios = require('axios');
 
 module.exports = async (req, res) => {
   const { location, radius, keyword } = req.query;
-  const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
+  const GOOGLE_PLACES_API_KEY = process.env.REACT_APP_GOOGLE_PLACES_API_KEY;
 
   try {
     const response = await axios.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json', {
