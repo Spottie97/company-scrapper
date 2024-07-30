@@ -27,10 +27,13 @@ function App() {
     try {
       const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json`;
       const geocodeParams = { address: location, key: GOOGLE_PLACES_API_KEY };
+      console.log("Requesting geocode for location:", location);
       const geocodeResponse = await axios.get(geocodeUrl, { params: geocodeParams });
-
+  
+      console.log("Geocode response:", geocodeResponse.data);
+  
       if (!geocodeResponse.data.results.length) {
-        console.error("No geocoding results found");
+        console.error("No geocoding results found for location:", location);
         return [];
       }
 
