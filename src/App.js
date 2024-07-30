@@ -11,6 +11,9 @@ function App() {
   const [selectedCompanies, setSelectedCompanies] = useState([]);
 
   useEffect(() => {
+    // Set the document title
+    document.title = "Scrappy";
+
     const fetchIndustries = async () => {
       try {
         const response = await axios.get('/industries.json');
@@ -31,19 +34,19 @@ function App() {
           keyword: industry,
         },
       });
-  
+
       if (!response.data.length) {
         console.error("No results found");
         return [];
       }
-  
+
       return response.data; // This now contains detailed place information
     } catch (error) {
       console.error("Error fetching from Google Places:", error);
       return [];
     }
-  };  
-  
+  };
+
   const handleSearch = async () => {
     const cacheKey = `${location}-${industry}-${radius}`;
     const cachedCompanies = JSON.parse(localStorage.getItem(cacheKey)) || [];
@@ -118,7 +121,6 @@ function App() {
                   <th>Name</th>
                   <th>Contact</th>
                   <th>Location</th>
-                  <th>Industry</th>
                   <th>Website</th>
                 </tr>
               </thead>
@@ -135,7 +137,6 @@ function App() {
                     <td>{company.name}</td>
                     <td>{company.contact}</td>
                     <td>{company.location}</td>
-                    <td>{company.industry}</td>
                     <td>
                       <a href={company.website} target="_blank" rel="noopener noreferrer">
                         {company.website}
