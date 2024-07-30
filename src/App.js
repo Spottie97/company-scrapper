@@ -51,7 +51,7 @@ function App() {
       console.error("Error fetching from Google Places:", error);
       return [];
     }
-  };  
+  };    
   
   const handleSearch = async () => {
     const cacheKey = `${location}-${industry}-${radius}`;
