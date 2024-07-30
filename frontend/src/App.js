@@ -13,7 +13,7 @@ function App() {
 
   const fetchIndustries = async () => {
     try {
-      const response = await axios.get('/path/to/industries.json');
+      const response = await axios.get('/frontend/src/industries.json');
       setIndustries(response.data);
     } catch (error) {
       console.error('Error fetching industries:', error);
